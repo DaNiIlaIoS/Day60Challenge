@@ -11,24 +11,34 @@ struct ContentView: View {
     @State private var users = [User]()
     
     var body: some View {
+        NavigationStack {
             List {
                 ForEach(users, id: \.id) { user in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(user.name)
-                                .font(.headline)
-                            Text(user.email)
-                                .foregroundStyle(.secondary)
+                    NavigationLink(value: user) {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(user.name)
+                                    .font(.headline)
+                                Text(user.email)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Circle()
+                                .frame(width: 20)
+                                .foregroundStyle(user.isActive ? .green : .red)
                         }
-                        Spacer()
-                        Circle()
-                            .frame(width: 20)
-                            .foregroundStyle(user.isActive ? .green : .red)
                     }
                 }
             }
-        .task {
-            await getUsers()
+            .navigationTitle("Users")
+            .navigationDestination(for: User.self) { user in
+                UserDetailView(user: user)
+            }
+            .task {
+                if users.isEmpty {
+                    await getUsers()
+                }
+            }
         }
     }
     
