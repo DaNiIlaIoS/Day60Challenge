@@ -5,15 +5,18 @@
 //  Created by Даниил Сивожелезов on 18.10.2024.
 //
 
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
-    @State private var users = [User]()
+    @Environment(\.modelContext) private var modelContext
+    @Query var users: [User]
+    //    @State private var users = [User]()
     
     var body: some View {
         NavigationStack {
             List {
-                ForEach(users, id: \.id) { user in
+                ForEach(users) { user in
                     NavigationLink(value: user) {
                         HStack {
                             VStack(alignment: .leading) {
@@ -51,10 +54,10 @@ struct ContentView: View {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             
-            if let decoder = try? JSONDecoder().decode([User].self, from: data) {
-                users = decoder
+            let decodedUsers = try JSONDecoder().decode([User].self, from: data)
+            decodedUsers.forEach { user in
+                modelContext.insert(user)
             }
-            
         } catch {
             print(error.localizedDescription)
         }
