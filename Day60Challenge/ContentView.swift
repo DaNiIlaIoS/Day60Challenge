@@ -13,7 +13,18 @@ struct ContentView: View {
     var body: some View {
             List {
                 ForEach(users, id: \.id) { user in
-                    Text(user.name)
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(user.name)
+                                .font(.headline)
+                            Text(user.email)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Circle()
+                            .frame(width: 20)
+                            .foregroundStyle(user.isActive ? .green : .red)
+                    }
                 }
             }
         .task {
