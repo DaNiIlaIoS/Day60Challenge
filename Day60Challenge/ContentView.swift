@@ -10,56 +10,26 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query var users: [User]
-    //    @State private var users = [User]()
+    
+    @State private var showOnlyActive = false
     
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(users) { user in
-                    NavigationLink(value: user) {
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text(user.name)
-                                    .font(.headline)
-                                Text(user.email)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Circle()
-                                .frame(width: 20)
-                                .foregroundStyle(user.isActive ? .green : .red)
-                        }
-                    }
-                }
-            }
+            UsersView(showOnlyActive: showOnlyActive)
             .navigationTitle("Users")
             .navigationDestination(for: User.self) { user in
                 UserDetailView(user: user)
             }
-            .task {
-                if users.isEmpty {
-                    await getUsers()
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(showOnlyActive ? "Show All Users" : "Show Active Users") {
+                        showOnlyActive.toggle()
+                    }
+                }
+                ToolbarItem(placement: .topBarLeading) {
+                    EditButton()
                 }
             }
-        }
-    }
-    
-    func getUsers() async {
-        guard let url = URL(string: "https://www.hackingwithswift.com/samples/friendface.json") else {
-            print("Invalid URL")
-            return
-        }
-        
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            
-            let decodedUsers = try JSONDecoder().decode([User].self, from: data)
-            decodedUsers.forEach { user in
-                modelContext.insert(user)
-            }
-        } catch {
-            print(error.localizedDescription)
         }
     }
 }
